@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: bissa-esse-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      CRM_STORAGE_MODE: mongo
+      MONGO_URL: mongodb://mongo:27017
+      CRM_DATABASE: bissa_esse_crm
+      JWT_SECRET: change-this-secret
+      ACCESS_TOKEN_EXPIRE_MINUTES: 720
+      AUTO_SEED_DEMO: "true"
+      CORS_ORIGINS: '["http://localhost:4200","http://127.0.0.1:4200","http://localhost:8080"]'
+    depends_on:
+      - mongo
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  mongo-data:
