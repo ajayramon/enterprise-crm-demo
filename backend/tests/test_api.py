@@ -34,6 +34,27 @@ def test_login_and_dashboard_metrics() -> None:
     assert metrics['total_pipeline_value'] > 0
 
 
+def test_register_defaults_to_sales_rep_role() -> None:
+    response = client.post(
+        '/api/auth/register',
+        json={
+            'name': 'New Enterprise Rep',
+            'email': 'newrep@bissaesse.com',
+            'role': 'admin',
+            'title': 'Should not become admin',
+            'region': 'North America',
+            'password': 'Password123!',
+        },
+    )
+    assert response.status_code == 201, response.text
+    payload = response.json()
+    assert payload['role'] == 'sales_rep'
+
+    login = client.post('/api/auth/login', json={'email': 'newrep@bissaesse.com', 'password': 'Password123!'})
+    assert login.status_code == 200
+    assert login.json()['user']['role'] == 'sales_rep'
+
+
 def test_customer_deal_and_activity_crud_flow() -> None:
     headers = auth_headers()
     customer_payload = {

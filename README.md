@@ -59,7 +59,7 @@ npm install
 npm start
 ```
 
-The Angular app is available at `http://localhost:4200`.
+The Angular app is available at `http://localhost:4200`, and the Angular dev server proxies `/api` requests to `http://localhost:8000`.
 
 ## Quick preview without MongoDB
 
@@ -75,6 +75,7 @@ CRM_STORAGE_MODE=memory uvicorn main:app --reload
 Start the full prototype stack with Docker:
 
 ```bash
+cp .env.example .env
 docker compose up --build
 ```
 

@@ -6,6 +6,13 @@ import { AuthService } from './auth.service';
 import { CrmService } from './crm.service';
 import { Customer, Deal } from './models';
 
+function localDateInputValue(value: Date = new Date()): string {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 @Component({
   selector: 'app-deals-page',
   standalone: true,
@@ -114,7 +121,7 @@ export class DealsPageComponent implements OnInit {
     stage: ['Prospecting'],
     value: [0, [Validators.required, Validators.min(0)]],
     probability: [25, [Validators.required, Validators.min(0), Validators.max(100)]],
-    expected_close_date: [new Date().toISOString().slice(0, 10), Validators.required],
+    expected_close_date: [localDateInputValue(), Validators.required],
     description: [''],
   });
 
@@ -184,7 +191,7 @@ export class DealsPageComponent implements OnInit {
       stage: 'Prospecting',
       value: 0,
       probability: 25,
-      expected_close_date: new Date().toISOString().slice(0, 10),
+      expected_close_date: localDateInputValue(),
       description: '',
     });
     this.editingId.set(null);

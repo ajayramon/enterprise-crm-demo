@@ -20,7 +20,7 @@ def login(payload: LoginRequest, repo: CRMRepository = Depends(get_repo)) -> Tok
 @router.post('/register', response_model=UserPublic, status_code=status.HTTP_201_CREATED)
 def register(payload: UserCreate, repo: CRMRepository = Depends(get_repo)) -> UserPublic:
     try:
-        user = repo.create_user(payload)
+        user = repo.create_user(payload.model_copy(update={'role': 'sales_rep'}))
     except CRMConflictError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     return to_public_user(user)

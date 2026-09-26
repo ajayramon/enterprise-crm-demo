@@ -6,6 +6,15 @@ import { AuthService } from './auth.service';
 import { CrmService } from './crm.service';
 import { Activity, Customer, Deal } from './models';
 
+function localDateTimeInputValue(value: Date = new Date()): string {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  const hours = String(value.getHours()).padStart(2, '0');
+  const minutes = String(value.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 @Component({
   selector: 'app-activities-page',
   standalone: true,
@@ -117,7 +126,7 @@ export class ActivitiesPageComponent implements OnInit {
     assigned_to_id: [''],
     assigned_to_name: [''],
     priority: ['Medium'],
-    due_date: [new Date().toISOString().slice(0, 16), Validators.required],
+    due_date: [localDateTimeInputValue(), Validators.required],
     status: ['Pending'],
     deal_id: [''],
     notes: [''],
@@ -165,7 +174,7 @@ export class ActivitiesPageComponent implements OnInit {
       assigned_to_id: activity.assigned_to_id,
       assigned_to_name: activity.assigned_to_name,
       priority: activity.priority,
-      due_date: activity.due_date.slice(0, 16),
+      due_date: localDateTimeInputValue(new Date(activity.due_date)),
       status: activity.status,
       deal_id: activity.deal_id ?? '',
       notes: activity.notes,
@@ -215,7 +224,7 @@ export class ActivitiesPageComponent implements OnInit {
       assigned_to_id: '',
       assigned_to_name: '',
       priority: 'Medium',
-      due_date: new Date().toISOString().slice(0, 16),
+      due_date: localDateTimeInputValue(),
       status: 'Pending',
       deal_id: '',
       notes: '',

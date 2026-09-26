@@ -17,7 +17,7 @@ services:
       CRM_STORAGE_MODE: mongo
       MONGO_URL: mongodb://mongo:27017
       CRM_DATABASE: bissa_esse_crm
-      JWT_SECRET: change-this-secret
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in your environment or .env}
       ACCESS_TOKEN_EXPIRE_MINUTES: 720
       AUTO_SEED_DEMO: "true"
       CORS_ORIGINS: '["http://localhost:4200","http://127.0.0.1:4200","http://localhost:8080"]'
