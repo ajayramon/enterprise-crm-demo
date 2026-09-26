@@ -176,7 +176,23 @@ class InMemoryCRMRepository(CRMRepository):
 
     def update_customer(self, customer_id: str, payload: CustomerUpdate) -> dict[str, Any]:
         customer = self.get_customer(customer_id)
-        customer.update(payload.model_dump(exclude_none=True))
+        updates = payload.model_dump(exclude_none=True)
+        mutable_fields = {
+            'company_name',
+            'primary_contact',
+            'email',
+            'phone',
+            'address',
+            'industry',
+            'segment',
+            'status',
+            'health_score',
+            'annual_revenue',
+            'employee_count',
+            'notes',
+            'history',
+        }
+        customer.update({key: value for key, value in updates.items() if key in mutable_fields})
         customer['updated_at'] = datetime.now(timezone.utc)
         self.customers[customer_id] = customer
         return deepcopy(customer)
@@ -218,6 +234,8 @@ class InMemoryCRMRepository(CRMRepository):
     def update_deal(self, deal_id: str, payload: DealUpdate) -> dict[str, Any]:
         deal = self.get_deal(deal_id)
         updates = payload.model_dump(exclude_none=True)
+        if 'customer_id' in updates:
+            self.get_customer(updates['customer_id'])
         deal.update(updates)
         deal['updated_at'] = datetime.now(timezone.utc)
         self.deals[deal_id] = deal
@@ -260,6 +278,8 @@ class InMemoryCRMRepository(CRMRepository):
     def update_activity(self, activity_id: str, payload: ActivityUpdate) -> dict[str, Any]:
         activity = self.get_activity(activity_id)
         updates = payload.model_dump(exclude_none=True)
+        if 'customer_id' in updates:
+            self.get_customer(updates['customer_id'])
         if updates.get('status') == 'Completed' and 'completed_at' not in updates:
             updates['completed_at'] = datetime.now(timezone.utc)
         activity.update(updates)
@@ -423,9 +443,10 @@ class MongoCRMRepository(CRMRepository):
         return customer
 
     def update_customer(self, customer_id: str, payload: CustomerUpdate) -> dict[str, Any]:
+        updates = payload.model_dump(exclude_none=True)
         result = self._collection('customers').find_one_and_update(
             {'id': customer_id},
-            {'$set': {**payload.model_dump(exclude_none=True), 'updated_at': datetime.now(timezone.utc)}},
+            {'$set': {**updates, 'updated_at': datetime.now(timezone.utc)}},
             return_document=ReturnDocument.AFTER,
         )
         record = self._serialize(result)
@@ -465,9 +486,12 @@ class MongoCRMRepository(CRMRepository):
         return deal
 
     def update_deal(self, deal_id: str, payload: DealUpdate) -> dict[str, Any]:
+        updates = payload.model_dump(exclude_none=True)
+        if 'customer_id' in updates:
+            self.get_customer(updates['customer_id'])
         result = self._collection('deals').find_one_and_update(
             {'id': deal_id},
-            {'$set': {**payload.model_dump(exclude_none=True), 'updated_at': datetime.now(timezone.utc)}},
+            {'$set': {**updates, 'updated_at': datetime.now(timezone.utc)}},
             return_document=ReturnDocument.AFTER,
         )
         record = self._serialize(result)
@@ -507,6 +531,8 @@ class MongoCRMRepository(CRMRepository):
 
     def update_activity(self, activity_id: str, payload: ActivityUpdate) -> dict[str, Any]:
         updates = payload.model_dump(exclude_none=True)
+        if 'customer_id' in updates:
+            self.get_customer(updates['customer_id'])
         if updates.get('status') == 'Completed' and 'completed_at' not in updates:
             updates['completed_at'] = datetime.now(timezone.utc)
         result = self._collection('activities').find_one_and_update(

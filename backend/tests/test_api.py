@@ -76,6 +76,19 @@ def test_customer_deal_and_activity_crud_flow() -> None:
     customer_response = client.post('/api/customers', headers=headers, json=customer_payload)
     assert customer_response.status_code == 201, customer_response.text
     customer = customer_response.json()
+    original_customer_created_at = customer['created_at']
+
+    customer_update = client.put(
+        f"/api/customers/{customer['id']}",
+        headers=headers,
+        json={'status': 'Active', 'health_score': 82},
+    )
+    assert customer_update.status_code == 200, customer_update.text
+    updated_customer = customer_update.json()
+    assert updated_customer['status'] == 'Active'
+    assert updated_customer['health_score'] == 82
+    assert updated_customer['owner_name'] == customer['owner_name']
+    assert updated_customer['created_at'] == original_customer_created_at
 
     deal_payload = {
         'title': 'Helios CRM transformation',
@@ -93,6 +106,19 @@ def test_customer_deal_and_activity_crud_flow() -> None:
     deal_response = client.post('/api/deals', headers=headers, json=deal_payload)
     assert deal_response.status_code == 201, deal_response.text
     deal = deal_response.json()
+    original_deal_created_at = deal['created_at']
+
+    deal_update = client.put(
+        f"/api/deals/{deal['id']}",
+        headers=headers,
+        json={'probability': 85, 'stage': 'Negotiation'},
+    )
+    assert deal_update.status_code == 200, deal_update.text
+    updated_deal = deal_update.json()
+    assert updated_deal['probability'] == 85
+    assert updated_deal['stage'] == 'Negotiation'
+    assert updated_deal['owner_name'] == deal['owner_name']
+    assert updated_deal['created_at'] == original_deal_created_at
 
     activity_payload = {
         'title': 'Executive proposal review',
