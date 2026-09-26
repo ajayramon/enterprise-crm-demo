@@ -168,3 +168,52 @@ def test_sales_rep_cannot_edit_other_users_records() -> None:
 
     activity_response = client.put('/api/activities/act-1', headers=headers, json={'status': 'Completed'})
     assert activity_response.status_code == 403
+
+
+def test_create_endpoints_ignore_forged_owner_fields() -> None:
+    headers = auth_headers('rep@bissaesse.com', 'Password123!')
+
+    deal_response = client.post(
+        '/api/deals',
+        headers=headers,
+        json={
+            'title': 'Forged owner deal',
+            'customer_id': 'cust-kingsway',
+            'customer_name': 'Kingsway Logistics',
+            'owner_id': 'user-admin',
+            'owner_name': 'Ama Mensah',
+            'stage': 'Prospecting',
+            'value': 50000,
+            'probability': 20,
+            'expected_close_date': str(date.today() + timedelta(days=14)),
+            'description': 'Ownership should be reset to the authenticated user.',
+            'history': [],
+        },
+    )
+    assert deal_response.status_code == 201, deal_response.text
+    created_deal = deal_response.json()
+    assert created_deal['owner_id'] == 'user-rep'
+    assert created_deal['owner_name'] == 'Efua Owusu'
+
+    activity_response = client.post(
+        '/api/activities',
+        headers=headers,
+        json={
+            'title': 'Forged assignee activity',
+            'activity_type': 'Task',
+            'customer_id': 'cust-kingsway',
+            'customer_name': 'Kingsway Logistics',
+            'assigned_to_id': 'user-admin',
+            'assigned_to_name': 'Ama Mensah',
+            'priority': 'Medium',
+            'due_date': (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
+            'status': 'Pending',
+            'deal_id': None,
+            'notes': 'Assignee should be reset to the authenticated user.',
+            'completed_at': None,
+        },
+    )
+    assert activity_response.status_code == 201, activity_response.text
+    created_activity = activity_response.json()
+    assert created_activity['assigned_to_id'] == 'user-rep'
+    assert created_activity['assigned_to_name'] == 'Efua Owusu'

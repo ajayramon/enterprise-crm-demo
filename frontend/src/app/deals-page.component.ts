@@ -160,7 +160,7 @@ export class DealsPageComponent implements OnInit {
     const currentUser = this.authService.currentUser();
     const existing = this.deals().find((deal) => deal.id === this.editingId());
     const payload = {
-      ...this.form.getRawValue(),
+      ...this.buildDealPayload(),
       owner_id: existing?.owner_id ?? currentUser?.id ?? '',
       owner_name: existing?.owner_name ?? currentUser?.name ?? '',
       history: existing?.history ?? this.selectedDeal()?.history ?? [],
@@ -199,5 +199,19 @@ export class DealsPageComponent implements OnInit {
       this.selectedDeal.set(null);
     }
     this.editingId.set(null);
+  }
+
+  private buildDealPayload() {
+    const value = this.form.getRawValue();
+    return {
+      title: value.title,
+      customer_id: value.customer_id,
+      customer_name: value.customer_name,
+      stage: value.stage,
+      value: value.value,
+      probability: value.probability,
+      expected_close_date: value.expected_close_date,
+      description: value.description,
+    };
   }
 }

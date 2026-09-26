@@ -204,11 +204,10 @@ export class ActivitiesPageComponent implements OnInit {
     const currentUser = this.authService.currentUser();
     const existing = this.activities().find((activity) => activity.id === this.editingId());
     const payload = {
-      ...this.form.getRawValue(),
+      ...this.buildActivityPayload(),
       assigned_to_id: existing?.assigned_to_id ?? currentUser?.id ?? '',
       assigned_to_name: existing?.assigned_to_name ?? currentUser?.name ?? '',
       due_date: serializeLocalDateTime(this.form.getRawValue().due_date),
-      deal_id: this.form.getRawValue().deal_id || null,
       completed_at: this.form.getRawValue().completed_at || existing?.completed_at || null,
     };
     const request = this.editingId()
@@ -252,5 +251,19 @@ export class ActivitiesPageComponent implements OnInit {
       this.editingId.set(null);
     }
     this.editingId.set(null);
+  }
+
+  private buildActivityPayload() {
+    const value = this.form.getRawValue();
+    return {
+      title: value.title,
+      activity_type: value.activity_type,
+      customer_id: value.customer_id,
+      customer_name: value.customer_name,
+      priority: value.priority,
+      status: value.status,
+      deal_id: value.deal_id || null,
+      notes: value.notes,
+    };
   }
 }

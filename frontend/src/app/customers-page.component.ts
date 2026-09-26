@@ -156,9 +156,10 @@ export class CustomersPageComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
+    const payload = this.buildCustomerPayload();
     const request = this.editingId()
-      ? this.crmService.updateCustomer(this.editingId()!, this.form.getRawValue())
-      : this.crmService.createCustomer({ ...this.form.getRawValue(), history: [] });
+      ? this.crmService.updateCustomer(this.editingId()!, payload)
+      : this.crmService.createCustomer({ ...payload, history: [] });
 
     request.subscribe((customer) => {
       this.resetForm(false);
@@ -193,5 +194,23 @@ export class CustomersPageComponent implements OnInit {
       this.selectedCustomer.set(null);
     }
     this.editingId.set(null);
+  }
+
+  private buildCustomerPayload() {
+    const value = this.form.getRawValue();
+    return {
+      company_name: value.company_name,
+      primary_contact: value.primary_contact,
+      email: value.email,
+      phone: value.phone,
+      address: value.address,
+      industry: value.industry,
+      segment: value.segment,
+      status: value.status,
+      health_score: value.health_score,
+      annual_revenue: value.annual_revenue,
+      employee_count: value.employee_count,
+      notes: value.notes,
+    };
   }
 }

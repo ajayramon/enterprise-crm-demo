@@ -18,8 +18,15 @@ def list_activities(
 
 
 @router.post('', response_model=ActivityPublic, status_code=status.HTTP_201_CREATED)
-def create_activity(payload: ActivityCreate, repo: CRMRepository = Depends(get_repo), _: dict = Depends(get_current_user)) -> ActivityPublic:
-    return ActivityPublic.model_validate(repo.create_activity(payload))
+def create_activity(
+    payload: ActivityCreate,
+    repo: CRMRepository = Depends(get_repo),
+    current_user: dict = Depends(get_current_user),
+) -> ActivityPublic:
+    secured_payload = payload.model_copy(
+        update={'assigned_to_id': current_user['id'], 'assigned_to_name': current_user['name']}
+    )
+    return ActivityPublic.model_validate(repo.create_activity(secured_payload))
 
 
 @router.get('/{activity_id}', response_model=ActivityPublic)

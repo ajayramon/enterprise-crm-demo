@@ -18,8 +18,13 @@ def list_deals(
 
 
 @router.post('', response_model=DealPublic, status_code=status.HTTP_201_CREATED)
-def create_deal(payload: DealCreate, repo: CRMRepository = Depends(get_repo), _: dict = Depends(get_current_user)) -> DealPublic:
-    return DealPublic.model_validate(repo.create_deal(payload))
+def create_deal(
+    payload: DealCreate,
+    repo: CRMRepository = Depends(get_repo),
+    current_user: dict = Depends(get_current_user),
+) -> DealPublic:
+    secured_payload = payload.model_copy(update={'owner_id': current_user['id'], 'owner_name': current_user['name']})
+    return DealPublic.model_validate(repo.create_deal(secured_payload))
 
 
 @router.get('/pipeline', response_model=list[PipelineStageSummary])
