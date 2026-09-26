@@ -15,6 +15,21 @@ function localDateTimeInputValue(value: Date = new Date()): string {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+function serializeLocalDateTime(value: string): string {
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? '+' : '-';
+  const absoluteOffset = Math.abs(offsetMinutes);
+  const offsetHours = String(Math.floor(absoluteOffset / 60)).padStart(2, '0');
+  const offsetRemainder = String(absoluteOffset % 60).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}:00${sign}${offsetHours}:${offsetRemainder}`;
+}
+
 @Component({
   selector: 'app-activities-page',
   standalone: true,
@@ -192,7 +207,7 @@ export class ActivitiesPageComponent implements OnInit {
       ...this.form.getRawValue(),
       assigned_to_id: existing?.assigned_to_id ?? currentUser?.id ?? '',
       assigned_to_name: existing?.assigned_to_name ?? currentUser?.name ?? '',
-      due_date: new Date(this.form.getRawValue().due_date).toISOString(),
+      due_date: serializeLocalDateTime(this.form.getRawValue().due_date),
       deal_id: this.form.getRawValue().deal_id || null,
       completed_at: this.form.getRawValue().completed_at || existing?.completed_at || null,
     };
@@ -200,7 +215,7 @@ export class ActivitiesPageComponent implements OnInit {
       ? this.crmService.updateActivity(this.editingId()!, payload)
       : this.crmService.createActivity(payload);
     request.subscribe(() => {
-      this.resetForm();
+      this.resetForm(false);
       this.loadData();
     });
   }
@@ -218,7 +233,7 @@ export class ActivitiesPageComponent implements OnInit {
     this.crmService.deleteActivity(id).subscribe(() => this.loadData());
   }
 
-  resetForm(): void {
+  resetForm(clearSelection = true): void {
     this.form.reset({
       title: '',
       activity_type: 'Task',
@@ -233,6 +248,9 @@ export class ActivitiesPageComponent implements OnInit {
       notes: '',
       completed_at: '',
     });
+    if (clearSelection) {
+      this.editingId.set(null);
+    }
     this.editingId.set(null);
   }
 }

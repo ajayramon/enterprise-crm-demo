@@ -155,3 +155,16 @@ def test_role_protection_for_users_endpoint() -> None:
     headers = auth_headers('rep@bissaesse.com', 'Password123!')
     response = client.get('/api/users', headers=headers)
     assert response.status_code == 403
+
+
+def test_sales_rep_cannot_edit_other_users_records() -> None:
+    headers = auth_headers('rep@bissaesse.com', 'Password123!')
+
+    customer_response = client.put('/api/customers/cust-aurora', headers=headers, json={'status': 'Churned'})
+    assert customer_response.status_code == 403
+
+    deal_response = client.put('/api/deals/deal-aurora-renewal', headers=headers, json={'stage': 'Closed Lost'})
+    assert deal_response.status_code == 403
+
+    activity_response = client.put('/api/activities/act-1', headers=headers, json={'status': 'Completed'})
+    assert activity_response.status_code == 403

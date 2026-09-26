@@ -36,8 +36,16 @@ def get_deal(deal_id: str, repo: CRMRepository = Depends(get_repo), _: dict = De
 
 
 @router.put('/{deal_id}', response_model=DealPublic)
-def update_deal(deal_id: str, payload: DealUpdate, repo: CRMRepository = Depends(get_repo), _: dict = Depends(get_current_user)) -> DealPublic:
+def update_deal(
+    deal_id: str,
+    payload: DealUpdate,
+    repo: CRMRepository = Depends(get_repo),
+    current_user: dict = Depends(get_current_user),
+) -> DealPublic:
     try:
+        existing_deal = repo.get_deal(deal_id)
+        if current_user['role'] not in {'admin', 'manager'} and existing_deal['owner_id'] != current_user['id']:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You do not have access to this resource')
         return DealPublic.model_validate(repo.update_deal(deal_id, payload))
     except CRMNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc

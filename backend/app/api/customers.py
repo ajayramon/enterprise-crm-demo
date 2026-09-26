@@ -39,9 +39,12 @@ def update_customer(
     customer_id: str,
     payload: CustomerUpdate,
     repo: CRMRepository = Depends(get_repo),
-    _: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ) -> CustomerPublic:
     try:
+        existing_customer = repo.get_customer(customer_id)
+        if current_user['role'] not in {'admin', 'manager'} and existing_customer['owner_id'] != current_user['id']:
+            raise HTTPException(status_code=http_status.HTTP_403_FORBIDDEN, detail='You do not have access to this resource')
         return CustomerPublic.model_validate(repo.update_customer(customer_id, payload))
     except CRMNotFoundError as exc:
         raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc

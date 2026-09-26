@@ -169,8 +169,8 @@ export class DealsPageComponent implements OnInit {
       ? this.crmService.updateDeal(this.editingId()!, payload)
       : this.crmService.createDeal(payload);
     request.subscribe((deal) => {
+      this.resetForm(false);
       this.selectedDeal.set(deal);
-      this.resetForm();
       this.loadData();
     });
   }
@@ -182,7 +182,7 @@ export class DealsPageComponent implements OnInit {
     this.crmService.deleteDeal(id).subscribe(() => this.loadData());
   }
 
-  resetForm(): void {
+  resetForm(clearSelection = true): void {
     this.form.reset({
       title: '',
       customer_id: '',
@@ -195,6 +195,9 @@ export class DealsPageComponent implements OnInit {
       expected_close_date: localDateInputValue(),
       description: '',
     });
+    if (clearSelection) {
+      this.selectedDeal.set(null);
+    }
     this.editingId.set(null);
   }
 }

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { switchMap } from 'rxjs';
 
 import { AuthService } from './auth.service';
 import { CrmService } from './crm.service';
@@ -108,9 +109,11 @@ export class UsersPageComponent implements OnInit {
       region: formValue.region,
       password: formValue.password || null,
     };
-    this.crmService.updateProfile(payload).subscribe((user) => {
-      this.authService.refreshProfile().subscribe();
-      this.profileForm.patchValue({ name: user.name, title: user.title, region: user.region, password: '' });
-    });
+    this.crmService
+      .updateProfile(payload)
+      .pipe(switchMap(() => this.authService.refreshProfile()))
+      .subscribe((user) => {
+        this.profileForm.patchValue({ name: user.name, title: user.title, region: user.region, password: '' });
+      });
   }
 }

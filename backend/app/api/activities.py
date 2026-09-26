@@ -31,8 +31,16 @@ def get_activity(activity_id: str, repo: CRMRepository = Depends(get_repo), _: d
 
 
 @router.put('/{activity_id}', response_model=ActivityPublic)
-def update_activity(activity_id: str, payload: ActivityUpdate, repo: CRMRepository = Depends(get_repo), _: dict = Depends(get_current_user)) -> ActivityPublic:
+def update_activity(
+    activity_id: str,
+    payload: ActivityUpdate,
+    repo: CRMRepository = Depends(get_repo),
+    current_user: dict = Depends(get_current_user),
+) -> ActivityPublic:
     try:
+        existing_activity = repo.get_activity(activity_id)
+        if current_user['role'] not in {'admin', 'manager'} and existing_activity['assigned_to_id'] != current_user['id']:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You do not have access to this resource')
         return ActivityPublic.model_validate(repo.update_activity(activity_id, payload))
     except CRMNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc

@@ -161,8 +161,8 @@ export class CustomersPageComponent implements OnInit {
       : this.crmService.createCustomer({ ...this.form.getRawValue(), history: [] });
 
     request.subscribe((customer) => {
+      this.resetForm(false);
       this.selectedCustomer.set(customer);
-      this.resetForm();
       this.loadCustomers();
     });
   }
@@ -174,7 +174,7 @@ export class CustomersPageComponent implements OnInit {
     this.crmService.deleteCustomer(id).subscribe(() => this.loadCustomers());
   }
 
-  resetForm(): void {
+  resetForm(clearSelection = true): void {
     this.form.reset({
       company_name: '',
       primary_contact: '',
@@ -189,7 +189,9 @@ export class CustomersPageComponent implements OnInit {
       employee_count: 100,
       notes: '',
     });
-    this.selectedCustomer.set(null);
+    if (clearSelection) {
+      this.selectedCustomer.set(null);
+    }
     this.editingId.set(null);
   }
 }
