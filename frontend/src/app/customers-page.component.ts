@@ -156,11 +156,9 @@ export class CustomersPageComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-
-    const payload = { ...this.form.getRawValue(), history: this.selectedCustomer()?.history ?? [] };
     const request = this.editingId()
-      ? this.crmService.updateCustomer(this.editingId()!, payload)
-      : this.crmService.createCustomer(payload);
+      ? this.crmService.updateCustomer(this.editingId()!, this.form.getRawValue())
+      : this.crmService.createCustomer({ ...this.form.getRawValue(), history: [] });
 
     request.subscribe((customer) => {
       this.selectedCustomer.set(customer);
@@ -191,6 +189,7 @@ export class CustomersPageComponent implements OnInit {
       employee_count: 100,
       notes: '',
     });
+    this.selectedCustomer.set(null);
     this.editingId.set(null);
   }
 }

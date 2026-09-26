@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 
 os.environ['CRM_STORAGE_MODE'] = 'memory'
 os.environ['AUTO_SEED_DEMO'] = 'true'
+os.environ['JWT_SECRET'] = 'test-secret'
 
 from fastapi.testclient import TestClient
 
@@ -121,6 +122,7 @@ def test_customer_deal_and_activity_crud_flow() -> None:
     )
     assert activity_update.status_code == 200
     assert activity_update.json()['status'] == 'Completed'
+    assert activity_update.json()['completed_at'] is not None
 
 
 def test_role_protection_for_users_endpoint() -> None:

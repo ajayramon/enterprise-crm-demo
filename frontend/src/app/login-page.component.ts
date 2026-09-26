@@ -24,7 +24,7 @@ import { environment } from '../environments/environment';
                     Track customers, accelerate deals, coordinate activity plans, and guide the revenue team with live analytics.
                   </p>
                   <div class="small text-white-50">
-                    Demo access: {{ demo.email }} / {{ demo.password }}
+                    Demo access email: {{ demoEmail }} · password available in the setup guide
                   </div>
                 </div>
                 <div class="col-lg-6 p-5 bg-white">
@@ -74,13 +74,13 @@ export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly demo = environment.demoCredentials;
+  readonly demoEmail = environment.demoEmail;
   readonly loading = signal(false);
   readonly error = signal('');
 
   readonly form = this.fb.nonNullable.group({
-    email: [this.demo.email, [Validators.required, Validators.email]],
-    password: [this.demo.password, [Validators.required, Validators.minLength(8)]],
+    email: [this.demoEmail, [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
   submit(): void {

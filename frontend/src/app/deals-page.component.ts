@@ -158,11 +158,12 @@ export class DealsPageComponent implements OnInit {
       return;
     }
     const currentUser = this.authService.currentUser();
+    const existing = this.deals().find((deal) => deal.id === this.editingId());
     const payload = {
       ...this.form.getRawValue(),
-      owner_id: currentUser?.id ?? '',
-      owner_name: currentUser?.name ?? '',
-      history: this.selectedDeal()?.history ?? [],
+      owner_id: existing?.owner_id ?? currentUser?.id ?? '',
+      owner_name: existing?.owner_name ?? currentUser?.name ?? '',
+      history: existing?.history ?? this.selectedDeal()?.history ?? [],
     };
     const request = this.editingId()
       ? this.crmService.updateDeal(this.editingId()!, payload)

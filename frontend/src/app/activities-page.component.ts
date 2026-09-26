@@ -187,13 +187,14 @@ export class ActivitiesPageComponent implements OnInit {
       return;
     }
     const currentUser = this.authService.currentUser();
+    const existing = this.activities().find((activity) => activity.id === this.editingId());
     const payload = {
       ...this.form.getRawValue(),
-      assigned_to_id: currentUser?.id ?? '',
-      assigned_to_name: currentUser?.name ?? '',
+      assigned_to_id: existing?.assigned_to_id ?? currentUser?.id ?? '',
+      assigned_to_name: existing?.assigned_to_name ?? currentUser?.name ?? '',
       due_date: new Date(this.form.getRawValue().due_date).toISOString(),
       deal_id: this.form.getRawValue().deal_id || null,
-      completed_at: this.form.getRawValue().completed_at || null,
+      completed_at: this.form.getRawValue().completed_at || existing?.completed_at || null,
     };
     const request = this.editingId()
       ? this.crmService.updateActivity(this.editingId()!, payload)
@@ -205,7 +206,9 @@ export class ActivitiesPageComponent implements OnInit {
   }
 
   markComplete(activity: Activity): void {
-    this.crmService.updateActivity(activity.id, { status: 'Completed' }).subscribe(() => this.loadData());
+    this.crmService
+      .updateActivity(activity.id, { status: 'Completed', completed_at: new Date().toISOString() })
+      .subscribe(() => this.loadData());
   }
 
   removeActivity(id: string): void {

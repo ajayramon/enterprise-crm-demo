@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Any
 from uuid import uuid4
 
@@ -303,13 +303,16 @@ class InMemoryCRMRepository(CRMRepository):
 
     def get_revenue_forecast(self) -> list[RevenueForecastPoint]:
         self._ensure_seeded()
-        grouped: dict[str, float] = defaultdict(float)
+        grouped: dict[date, float] = defaultdict(float)
         for deal in self.deals.values():
             if deal['stage'] == 'Closed Lost':
                 continue
-            label = deal['expected_close_date'].strftime('%b %Y')
-            grouped[label] += deal['value'] * max(deal['probability'], 25) / 100
-        return [RevenueForecastPoint(month=month, value=round(value, 2)) for month, value in sorted(grouped.items())]
+            month_key = deal['expected_close_date'].replace(day=1)
+            grouped[month_key] += deal['value'] * max(deal['probability'], 25) / 100
+        return [
+            RevenueForecastPoint(month=month.strftime('%b %Y'), value=round(value, 2))
+            for month, value in sorted(grouped.items(), key=lambda item: item[0])
+        ]
 
     def get_acquisition_metrics(self) -> list[AcquisitionMetric]:
         self._ensure_seeded()
