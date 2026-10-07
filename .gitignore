@@ -1,0 +1,28 @@
+# Node / Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Python / FastAPI
+backend/.venv/
+backend/__pycache__/
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/htmlcov/
+backend/.coverage
+**/__pycache__/
+*.pyc
+
+# Environment files
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/src/environments/*.local.ts
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
